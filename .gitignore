@@ -1,0 +1,8 @@
+*.py[co]
+**/.backups
+*.swp
+*.tif
+*.h5
+*.png
+*.pkl
+*.zip

@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: ntsne
+Version: 0.1
+Summary: A simple numpy wrapper around bh_tsne.
+Home-page: UNKNOWN
+Author: Brian DeCost
+Author-email: bdecost@andrew.cmu.edu
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
