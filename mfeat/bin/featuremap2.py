@@ -48,13 +48,8 @@ def featuremap2(micrographs_json, n_clusters, style, encoding, layername, multis
     """ compute image representations for each image enumerated in micrographs_json 
         results are stored in HDF5 keyed by the image ids in micrographs_json
     """
+    
     dataset_dir, __ = os.path.split(micrographs_json)
-#
-#    # crop scale bars off of full-sized images
-#    # don't crop pre-cropped images....
-#    barheight = 0
-#    if 'full' in dataset_dir:
-#        barheight = 38
 
     ensure_dir(os.path.join(dataset_dir, 'dictionary'))
     ensure_dir(os.path.join(dataset_dir, 'features'))
@@ -75,14 +70,11 @@ def featuremap2(micrographs_json, n_clusters, style, encoding, layername, multis
     }
     
     # obtain a dataset
-#    with open(micrographs_json, 'r') as f:
-#        micrograph_dataset = json.load(f)
     df_mg = pd.read_csv(micrographs_json)
-#
-#    # work with sorted micrograph keys...
-#    keys = sorted(micrograph_dataset.keys())
-#    micrographs = [micrograph_dataset[key] for key in keys]
-#    micrographs = [io.load_image(m, barheight=barheight) for m in micrographs]
+    df_mg = df_mg.loc[0:3360]  # At the moment we only have 3361 images labeled
+    df_mg.imPath = [dataset_dir+'/'+str(i)+'.tif' for i in df_mg['id'].tolist()]
+
+    
     keys = df_mg['id'].tolist()
     keys = [str(k) for k in keys]
     micrographs = [io.load_image(file, barheight=0) for file in df_mg['imPath'].tolist()]
