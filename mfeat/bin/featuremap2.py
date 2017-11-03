@@ -71,7 +71,6 @@ def featuremap2(micrographs_json, n_clusters, style, encoding, layername, multis
     
     # obtain a dataset
     df_mg = pd.read_csv(micrographs_json)
-    df_mg = df_mg.loc[0:3360]  # At the moment we only have 3361 images labeled
     df_mg.imPath = [dataset_dir+'/'+str(i)+'.tif' for i in df_mg['id'].tolist()]
 
     

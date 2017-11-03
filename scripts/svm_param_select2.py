@@ -126,38 +126,20 @@ def svm_param_select(datafile, kernel, margin_param, n_per_class, n_repeats, red
         os.makedirs(os.path.dirname(resultsfile))
     except FileExistsError:
         pass
-
+    
+    # Load keys and image features
     keys, features = load_representations(datafile)
 
-    # Use pandas here instead of wacky sqlite stuff
-    ids = pd.Series([int(s) for s in keys])
-    df_mg = pd.read_csv('/Users/Imperssonator/CC/uhcs/data/afm3000/afm3000.csv')
-    which_ids = np.where(ids.apply(lambda x: x in df_mg.id.tolist()))[0]
-    keys_reduced = keys[which_ids]
-    ids_reduced = pd.Series([int(s) for s in keys_reduced])
-    features_reduced = features[which_ids,:]
+    # Generate "labels" from df_mg pandas dataframe
+    ids = pd.Series([int(s) for s in keys])  # This accounts for the truncation of the 16,000 line database which happens in featuremap2
+    df_mg = pd.read_csv('/Users/Imperssonator/CC/uhcs/data/afm3000/afm3000.csv')  # load up the database in a df
     df_mg = df_mg.set_index('id')
-    labels = np.array(df_mg['channel'].loc[ids_reduced.tolist()])
+    labels = np.array(df_mg['fiber'][df_mg['id'].isin(ids)])
 
-#    labels = []
-#    for key in keys:
-#        if '-' in key:
-#            # deal with cropped micrographs: key -> Micrograph.id-UL
-#            m_id, quadrant = key.split('-')
-#        else:
-#            m_id = key
-#        m = db.query(Micrograph).filter(Micrograph.micrograph_id == int(m_id)).one()
-#        labels.append(m.primary_microconstituent)
-#    labels = np.array(labels)
-
-    # simplify: get primary microconstituent; throw out martensite
-#    primary_label = np.array([label.split('+')[0] for label in labels])
-#    k = np.array(keys)[primary_label != 'martensite']
-#    l = primary_label[primary_label != 'martensite']
-#    X = features[primary_label != 'martensite']
-
+    # Get a balanced dataset
     l, X, sel = select_balanced_dataset(labels, features, n_per_class=n_per_class, seed=seed)
-
+    
+    # split datasets for K-fold cross validation
     cv = StratifiedKFold(n_splits=10, shuffle=True)
     # cv = StratifiedShuffleSplit(n_splits=10, test_size=0.1)
 
