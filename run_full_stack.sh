@@ -20,8 +20,8 @@ TASK=fiber
 # First argument is original afm.csv
 # Second argument is output clean csv file (make sure it's the same folder as the original, can be named anything...
 
-echo "cleaning database"
-scripts/clean_afm_db.py ${DATADIR}/afm.csv ${DATADIR}/${CLEANCSV}
+#echo "cleaning database"
+#scripts/clean_afm_db.py ${DATADIR}/afm.csv ${DATADIR}/${CLEANCSV}
 
 
 # Compute CNN representations
@@ -31,16 +31,16 @@ scripts/clean_afm_db.py ${DATADIR}/afm.csv ${DATADIR}/${CLEANCSV}
 # -k <int> size of embedding for VLAD
 # -l <block4_conv3> layer of VGG16 to use
 
-echo "computing representations"
-mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s vgg16 -e vlad -k 100 -l block4_conv3
+#echo "computing representations"
+#mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s vgg16 -e vlad -k 100 -l block4_conv3
 
 
 # Train SVM for desired classification task
 
-echo "training SVM"
-for featurefile in ${DATADIR}/features/*vlad*.h5; do
-scripts/svm_param_select2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --kernel linear -C 1 -n 200 -r 10;
-done
+#echo "training SVM"
+#for featurefile in ${DATADIR}/features/*vlad*.h5; do
+#scripts/svm_param_select2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --kernel linear -C 1 -n 200 -r 10;
+#done
 
 
 # t-SNE embedding
