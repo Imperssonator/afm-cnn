@@ -8,7 +8,7 @@ import pandas as pd
 from sklearn.decomposition import PCA, KernelPCA
 from sklearn.metrics.pairwise import chi2_kernel, additive_chi2_kernel
 
-import ntsne
+from ntsne import ntsne
 
 # needed with slurm to see local python library under working dir
 import sys
