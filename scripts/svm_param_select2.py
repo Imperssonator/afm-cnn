@@ -134,7 +134,8 @@ def svm_param_select(datafile, dbcsv, task, kernel, margin_param, n_per_class, n
 
     # Generate "labels" from df_mg pandas dataframe. Task must be a valid column in the csv database
     df_mg = pd.read_csv(dbcsv)
-    labels = np.array(df_mg[task])
+    df_mg.set_index('id',inplace=True)
+    labels=np.array(df_mg[task].loc[[int(s) for s in keys]])
 
     # Get a balanced dataset
     l, X, sel = select_balanced_dataset(labels, features, n_per_class=n_per_class, seed=seed)

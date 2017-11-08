@@ -121,9 +121,11 @@ def tsne_map(featuresfile, dbcsv, task, mapsize, thumbsize, bordersize, perplexi
 
     keys, X = load_features(featuresfile, perplexity=perplexity)
     
+    # Get labels and paths from dataframe - but keys are not in numerical order when saved
     df_mg = pd.read_csv(dbcsv)
-    labels = df_mg[task].tolist()
-    paths = df_mg['imPath'].tolist()
+    df_mg.set_index('id',inplace=True)
+    labels = df_mg[task].loc[[int(s) for s in keys]].tolist()
+    paths = df_mg['imPath'].loc[[int(s) for s in keys]].tolist()
 
 #    labels, paths = [], []
 #    for key in keys:
