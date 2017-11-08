@@ -18,10 +18,11 @@ TSNESOURCE = 'https://github.com/lvdmaaten/bhtsne'
 
 # check to see if bh_tsne in on system PATH or in the CWD;
 # if not, clone and build it in ~/.ntsne if necessary
-
-print(os.getcwd())
-TSNEDIR = './scripts/ntsne'
-TSNE = os.path.join(TSNEDIR,'bh_tsne')
+augmented_path = os.getenv('PATH') + ':{}'.format(os.getcwd())
+TSNE = shutil.which('bh_tsne', path=augmented_path)
+if TSNE is None:
+    TSNEDIR = os.path.expanduser('~/.ntsne')
+    TSNE = os.path.join(TSNEDIR, 'bh_tsne')
 
 # set default bh_tsne parameters
 THETA = 0.5
