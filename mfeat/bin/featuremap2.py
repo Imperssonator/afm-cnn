@@ -73,9 +73,7 @@ def featuremap2(micrographs_json, n_clusters, style, encoding, layername, multis
     df_mg = pd.read_csv(micrographs_json)
     df_mg.imPath = [dataset_dir+'/'+str(i)+'.tif' for i in df_mg['id'].tolist()]
 
-    
-    keys = df_mg['id'].tolist()
-    keys = [str(k) for k in keys]
+    keys = [str(i) for i in df_mg['id'].tolist()]
     micrographs = [io.load_image(file, barheight=0) for file in df_mg['imPath'].tolist()]
 
     # set up paths

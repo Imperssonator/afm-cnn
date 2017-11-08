@@ -10,19 +10,19 @@ from sklearn.svm import SVC, LinearSVC
 from sklearn.metrics.pairwise import chi2_kernel, additive_chi2_kernel
 from sklearn.model_selection import StratifiedShuffleSplit, StratifiedKFold
 
-# needed with slurm to see local python library under working dir
-import sys
-sys.path.append(os.path.join(os.getcwd(), 'code'))
-
-import models
-from models import Base, User, Collection, Sample, Micrograph, dbpath
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-engine = create_engine('sqlite:///data/microstructures.sqlite')
-Base.metadata.bind = engine
-DBSession = sessionmaker(bind=engine)
-db = DBSession()
+## needed with slurm to see local python library under working dir
+#import sys
+#sys.path.append(os.path.join(os.getcwd(), 'code'))
+#
+#import models
+#from models import Base, User, Collection, Sample, Micrograph, dbpath
+#from sqlalchemy import create_engine
+#from sqlalchemy.orm import sessionmaker
+#
+#engine = create_engine('sqlite:///data/microstructures.sqlite')
+#Base.metadata.bind = engine
+#DBSession = sessionmaker(bind=engine)
+#db = DBSession()
 
 def load_representations(datafile):
     # grab image representations from hdf5 file
@@ -106,13 +106,15 @@ def cv_loop_linear(labels, X, cv, C=1, n_repeats=1, reduce_dim=None):
 
 @click.command()
 @click.argument('datafile', type=click.Path())
+@click.argument('dbcsv', type=click.Path())
+@click.argument('task', type=click.Path())
 @click.option('--kernel', '-k', type=click.Choice(['linear', 'chi2', 'rbf']), default='linear')
 @click.option('--margin-param', '-C', type=float, default=None)
 @click.option('--n-per-class', '-n', type=int, default=50)
 @click.option('--n-repeats', '-r', type=int, default=1)
 @click.option('--reduce-dim', '-d', type=int, default=None)
 @click.option('--seed', '-s', type=int, default=None)
-def svm_param_select(datafile, kernel, margin_param, n_per_class, n_repeats, reduce_dim, seed):
+def svm_param_select(datafile, dbcsv, task, kernel, margin_param, n_per_class, n_repeats, reduce_dim, seed):
     # datafile = './data/full/features/vgg16_block5_conv3-vlad-32.h5'
 
     # if margin_param is specified, record the results
@@ -130,11 +132,9 @@ def svm_param_select(datafile, kernel, margin_param, n_per_class, n_repeats, red
     # Load keys and image features
     keys, features = load_representations(datafile)
 
-    # Generate "labels" from df_mg pandas dataframe
-    ids = pd.Series([int(s) for s in keys])  # This accounts for the truncation of the 16,000 line database which happens in featuremap2
-    df_mg = pd.read_csv('/Users/Imperssonator/CC/uhcs/data/afm3000/afm3000.csv')  # load up the database in a df
-    df_mg = df_mg.set_index('id')
-    labels = np.array(df_mg['fiber'][df_mg['id'].isin(ids)])
+    # Generate "labels" from df_mg pandas dataframe. Task must be a valid column in the csv database
+    df_mg = pd.read_csv(dbcsv)
+    labels = np.array(df_mg[task])
 
     # Get a balanced dataset
     l, X, sel = select_balanced_dataset(labels, features, n_per_class=n_per_class, seed=seed)
