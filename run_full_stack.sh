@@ -11,7 +11,7 @@
 # the name for the cleaned CSV database
 # The classification task (column of CSV)
 
-DATADIR=/data/nep1/afm
+DATADIR=data/afm3000
 CLEANCSV=afm_clean.csv
 TASK=fiber
 
