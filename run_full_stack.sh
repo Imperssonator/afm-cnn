@@ -45,10 +45,15 @@ TASK=fiber
 
 # t-SNE embedding
 
-echo "performing t-SNE embedding"
-for featurefile in ${DATADIR}/features/*vlad*.h5; do
-scripts/tsne_embed2.py ${featurefile} --kernel linear --n-repeats 10;
-scripts/tsne_map2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --perplexity 40 --bordersize 8;
+#echo "performing t-SNE embedding"
+#for featurefile in ${DATADIR}/features/*vlad*.h5; do
+#scripts/tsne_embed2.py ${featurefile} --kernel linear --n-repeats 10
+#done
+
+
+# t-SNE figure generation
+
+echo "generating t-SNE map"
+for featurefile in ${DATADIR}/tsne/*.h5; do
+scripts/tsne_map2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --perplexity 40 --bordersize 8
 done
-
-
