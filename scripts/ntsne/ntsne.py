@@ -34,7 +34,7 @@ SEED = None
 def build_bhtsne():
     """ clone and build lvdmaaten's bhtsne """
     subprocess.call(['git', 'clone', TSNESOURCE, TSNEDIR])
-    subprocess.call(['g++', 'sptree.cpp', 'tsne.cpp', '-o', 'bh_tsne', '-O2'], cwd=TSNEDIR)
+    subprocess.call(['g++', 'sptree.cpp', 'tsne.cpp', 'tsne_main.cpp', '-o', 'bh_tsne', '-O2'], cwd=TSNEDIR)
     return
 
 def write_tsne_input(X, theta=THETA, perplexity=PERPLEXITY, map_dims=MAP_DIMS, max_iter=MAX_ITER, seed=SEED, cwd=''):
