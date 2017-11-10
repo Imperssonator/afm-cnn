@@ -52,12 +52,19 @@ def stash_tsne_embeddings(resultsfile, keys, embeddings, perplexity):
 @click.option('--seed', '-s', type=int, default=None)
 def tsne_embed(datafile, kernel, n_repeats, seed):
     # datafile = './data/full/features/vgg16_block5_conv3-vlad-32.h5'
+    
+    # Make a directory for the t-sne results
     print('working')
     resultsfile = datafile.replace('features', 'tsne')
+    try:
+        os.makedirs(os.path.dirname(resultsfile))
+    except FileExistsError:
+        pass
     
+    # Load the features
     keys, features = load_representations(datafile)
     
-
+    # Run t-SNE
     if kernel == 'linear':
         x_pca = PCA(n_components=50).fit_transform(features)
     elif kernel == 'chi2':

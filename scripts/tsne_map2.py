@@ -127,29 +127,17 @@ def tsne_map(featuresfile, dbcsv, task, mapsize, thumbsize, bordersize, perplexi
     labels = df_mg[task].loc[[int(s) for s in keys]].tolist()
     paths = df_mg['imPath'].loc[[int(s) for s in keys]].tolist()
 
-#    labels, paths = [], []
-#    for key in keys:
-#        if 'crop' in featuresfile:
-#            key = key.split('-')[0]
-#        m = db.query(Micrograph).filter(Micrograph.micrograph_id == int(key)).one()
-#        labels.append(m.primary_microconstituent)
-#
-#        basename, ext = os.path.splitext(m.path)
-#        paths.append('data/micrographs/micrograph{}{}'.format(m.micrograph_id, ext))
-
     # set thumbnail border colors -- keep consistent with scatter plots
-#    colornames = ["blue", "cerulean", "red", "dusty purple", "saffron", "dandelion", "green"]
+    # colornames = ["blue", "cerulean", "red", "dusty purple", "saffron", "dandelion", "green"]
     colornames = ["blue", "red"]
     pal = sns.xkcd_palette(colornames)
-#    unique_labels = np.array(['spheroidite', 'spheroidite+widmanstatten', 'martensite', 'network',
-#                              'pearlite', 'pearlite+spheroidite', 'pearlite+widmanstatten'])
+    
     unique_labels = np.unique(labels)
 
     cmap = {label: np.array(pal[idx]) for idx,label in enumerate(unique_labels)}
     colors = [cmap[label] for label in unique_labels]
     bordercolors = [cmap[label] for label in labels]
     
-
     # swap X[:,0] and X[:,1] to be consistent with how scatter plot displays images....
     XX = np.zeros_like(X)
     XX[:,0] = X[:,1]
@@ -160,7 +148,14 @@ def tsne_map(featuresfile, dbcsv, task, mapsize, thumbsize, bordersize, perplexi
 
     basename = os.path.basename(featuresfile)
     basename, ext = os.path.splitext(basename)
-    skimage.io.imsave('/{}/figures/tsne/map/{}-bordered-tsne-map.png'.format(dataset_dir, basename), imagemap)
+    imsave_name = '/{}/figures/tsne/map/{}-bordered-tsne-map.png'.format(dataset_dir, basename)
+    
+    try:
+        os.makedirs(os.path.dirname(imsave_name))
+    except FileExistsError:
+        pass
+    
+    skimage.io.imsave(imsave_name, imagemap)
 
 if __name__ == '__main__':
     tsne_map()
