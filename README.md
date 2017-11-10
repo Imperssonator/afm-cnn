@@ -11,7 +11,9 @@
 This code has a LOT of dependencies, and the tf_env.yml file lists all of them so that Anaconda can install them. It will not automatically set up tensorflow, though... if things aren't working, try these commands in this order, after making your environment:
 
 `conda install cudnn`
+
 `conda install tensorflow-gpu`
+
 `conda install keras-gpu`
 
 
