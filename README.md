@@ -1,6 +1,6 @@
 # AFM CNN
 
-Environment for training transfer-learning image classifiers on AFM images. Borrowed heavily from Brian DeCost's [UHCS code](https://github.com/bdecost/uhcs), modified for interaction with a simple CSV file for image labels. Dataset consists of >3,000 anonymized AFM images in different imaging modes, mostly from organic electronics materials systems.
+Environment for training transfer-learning image classifiers on AFM images. Essentially a fork of Brian DeCost's [UHCS code](https://github.com/bdecost/uhcs), modified for interaction with a simple CSV file for image labels. Dataset consists of >3,000 anonymized AFM images in different imaging modes, mostly from organic electronics materials systems.
 
 ## workflow
 
