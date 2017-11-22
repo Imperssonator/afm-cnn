@@ -28,6 +28,11 @@ def bag_of_words(features, dictionary):
 
     return bow
 
+def no_encode(features, dictionary):
+    """ No encoding, just return the features unaltered
+        """
+    return features
+
 def vlad(features, dictionary):
     """ construct VLAD features given an image and a dictionary 
         dictionary should be a scikit-learn clustering model (such as KMeans) """
