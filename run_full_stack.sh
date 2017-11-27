@@ -51,23 +51,24 @@ done
 
 # Train SVM for desired classification task
 
-echo "training SVM"
-for featurefile in ${DATADIR}/features/*vlad*.h5; do
-scripts/svm_param_select2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --kernel linear -C 1 -n 200 -r 10;
-done
+#echo "training SVM"
+#for featurefile in ${DATADIR}/features/*vlad*.h5; do
+#scripts/svm_param_select2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --kernel linear -C 1 -n 200 -r 10;
+#done
 
 
 # t-SNE embedding
 
-echo "performing t-SNE embedding"
-for featurefile in ${DATADIR}/features/*vlad*.h5; do
-scripts/tsne_embed2.py ${featurefile} --kernel linear --n-repeats 10
-done
+#echo "performing t-SNE embedding"
+#for featurefile in ${DATADIR}/features/*vlad*.h5; do
+#scripts/tsne_embed2.py ${featurefile} --kernel linear --n-repeats 10
+#done
 
 
 # t-SNE figure generation
 
-echo "generating t-SNE map"
-for featurefile in ${DATADIR}/tsne/*.h5; do
-scripts/tsne_map2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --perplexity 40 --bordersize 8
-done
+#echo "generating t-SNE map"
+#for featurefile in ${DATADIR}/tsne/*.h5; do
+#scripts/tsne_map2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --perplexity 40 --bordersize 8
+#done
+

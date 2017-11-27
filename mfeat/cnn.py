@@ -50,7 +50,7 @@ def cnn_features(image, layername, fraction=None):
     """ use keras to obtain cnn feature map """
     # TODO: refactor calling code to directly call keras model
     
-    model = Model(input=cnn.input, output=cnn.get_layer(layername).output)
+    model = Model(inputs=cnn.input, outputs=cnn.get_layer(layername).output)
     out = model.predict(image_tensor(image))
         
     return tensor_to_features(out)

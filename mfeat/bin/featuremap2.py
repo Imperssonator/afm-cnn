@@ -79,6 +79,7 @@ def featuremap2(micrographs_json, n_clusters, style, encoding, layername, multis
     # set up paths
     dictionary_file = '{dir}/dictionary/{method}-kmeans-{n_clusters}.pkl'.format(**metadata)
     featurefile = '{dir}/features/{method}-{encoding}-{n_clusters}.h5'.format(**metadata)
+    print(featurefile)
 
     if style == 'ssift':
         extract_func = lambda mic, fraction=1.0: local.sparse_sift(mic, fraction=fraction)
