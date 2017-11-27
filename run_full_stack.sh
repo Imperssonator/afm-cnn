@@ -35,18 +35,18 @@ echo "computing representations"
 for v_size in 64 128 256; do
     mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s vgg16 -e vlad -k ${v_size} -l block1_conv2
 done
-for v_size in 64 128 256; do
-    mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s vgg16 -e vlad -k ${v_size} -l block2_conv2
-done
-for v_size in 64 128 256; do
-    mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s vgg16 -e vlad -k ${v_size} -l block3_conv3
-done
-for v_size in 64 128 256; do
-    mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s vgg16 -e vlad -k ${v_size} -l block4_conv3
-done
-for v_size in 64 128 256; do
-    mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s vgg16 -e vlad -k ${v_size} -l block5_conv3
-done
+#for v_size in 64 128 256; do
+#    mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s vgg16 -e vlad -k ${v_size} -l block2_conv2
+#done
+#for v_size in 64 128 256; do
+#    mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s vgg16 -e vlad -k ${v_size} -l block3_conv3
+#done
+#for v_size in 64 128 256; do
+#    mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s vgg16 -e vlad -k ${v_size} -l block4_conv3
+#done
+#for v_size in 64 128 256; do
+#    mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s vgg16 -e vlad -k ${v_size} -l block5_conv3
+#done
 
 
 # Train SVM for desired classification task
