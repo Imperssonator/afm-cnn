@@ -23,7 +23,10 @@ def image_tensor(image):
     """ replicate a grayscale image onto the three channels of an RGB image
         and reshape into a tensor appropriate for keras
     """
-    image3d = gray2rgb(image).astype(np.float32)
+    if image.ndim<3:
+        image3d = gray2rgb(image).astype(np.float32)
+    else:
+        image3d = image.astype(np.float32)
     x = image3d #.transpose((2,0,1))
     x = np.expand_dims(x, axis=0)
     return preprocess_input(x)
