@@ -5,7 +5,7 @@
 # https://matin.gatech.edu/resources/290/download/AFM4005.zip
 
 MATIN_URL = https://matin.gatech.edu/resources/290/download/AFM4005.zip
-CSV_URL=https://matin.gatech.edu/resources/291/download/afm.csv
+CSV_URL=https://matin.gatech.edu/resources/298/download/afm.csv
 DATADIR=/data/nep1
 
 echo "download data files into DATADIR=${DATADIR}"
