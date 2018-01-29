@@ -24,7 +24,8 @@ def clean_afm_db(orig_csv, out_csv):
     df_mg['channel'] = df_mg['channel'].str.replace('ZSensor','Height')  # these channels are essentially equivalent
 
     # Simplify the noise category to 'noise' or 'clean'
-    df_mg.noise[df_mg['noise']!='c']='n'
+    df_mg['noise_simple']=df_mg['noise']
+    df_mg.noise_simple[df_mg['noise']!='c']='n'
 
     # Write out the file
     df_mg.to_csv(path_or_buf=out_csv, index=False)

@@ -14,4 +14,4 @@ echo "download data files into DATADIR=${DATADIR}"
 curl ${MATIN_URL} -o ${DATADIR}/AFM.zip
 unzip ${DATADIR}/AFM.zip -d ${DATADIR}/afm
 
-curl ${CSV_URL} -o ${DATADIR}/afm
+curl ${CSV_URL} -o ${DATADIR}/afm/afm.csv
