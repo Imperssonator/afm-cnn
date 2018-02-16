@@ -10,3 +10,4 @@
 data/
 Notebooks/.ipynb_checkpoints/
 **/.DS_Store
+mnist/

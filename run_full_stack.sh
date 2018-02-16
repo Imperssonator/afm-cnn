@@ -49,7 +49,7 @@ for v_size in 64 128 256; do
 done
 
 
- Train SVM for desired classification task
+# Train SVM for desired classification task
 
 echo "training SVM"
 for featurefile in ${DATADIR}/features/*vlad*.h5; do
@@ -57,7 +57,7 @@ scripts/svm_param_select2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --ker
 done
 
 
- t-SNE embedding
+# t-SNE embedding
 
 echo "performing t-SNE embedding"
 for featurefile in ${DATADIR}/features/*vlad*.h5; do
@@ -65,7 +65,7 @@ scripts/tsne_embed2.py ${featurefile} --kernel linear --n-repeats 10
 done
 
 
- t-SNE figure generation
+# t-SNE figure generation
 
 echo "generating t-SNE map"
 for featurefile in ${DATADIR}/tsne/*.h5; do
