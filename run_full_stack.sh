@@ -11,9 +11,9 @@
 # the name for the cleaned CSV database
 # The classification task (column of CSV)
 
-DATADIR=/data/nep1/afm
+DATADIR=data/raw
 CLEANCSV=afm_clean.csv
-TASK=fiber
+TASK=noise
 
 
 # Clean the main database:
@@ -41,34 +41,43 @@ echo "computing representations"
 #for v_size in 64 128 256; do
 #    mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s vgg16 -e vlad -k ${v_size} -l block3_conv3
 #done
-for v_size in 64 128 256; do
-    mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s vgg16 -e vlad -k ${v_size} -l block4_conv3
-done
-for v_size in 64 128 256; do
-    mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s vgg16 -e vlad -k ${v_size} -l block5_conv3
-done
+#for v_size in 64 128 256; do
+#    mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s vgg16 -e vlad -k ${v_size} -l block4_conv3
+#done
+#for v_size in 64 128 256; do
+#    mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s vgg16 -e vlad -k ${v_size} -l block5_conv3
+#done
+
+#mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s cvsift -e vlad -k 256
 
 
 # Train SVM for desired classification task
 
-echo "training SVM"
+#echo "training SVM"
+#for featurefile in ${DATADIR}/features/*vlad*.h5; do
+#scripts/svm_param_select2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --kernel linear -C 1 -n 50 -r 10;
+#done
+
+# For training RandomForests, use kernel "rf", and C = n_estimators
+
+echo "training RandomForest"
 for featurefile in ${DATADIR}/features/*vlad*.h5; do
-scripts/svm_param_select2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --kernel linear -C 1 -n 200 -r 10;
+scripts/svm_param_select2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --kernel rf -C 20 -r 1;
 done
 
 
-# t-SNE embedding
-
-echo "performing t-SNE embedding"
-for featurefile in ${DATADIR}/features/*vlad*.h5; do
-scripts/tsne_embed2.py ${featurefile} --kernel linear --n-repeats 10
-done
-
-
-# t-SNE figure generation
-
-echo "generating t-SNE map"
-for featurefile in ${DATADIR}/tsne/*.h5; do
-scripts/tsne_map2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --perplexity 40 --bordersize 8
-done
-
+## t-SNE embedding
+#
+#echo "performing t-SNE embedding"
+#for featurefile in ${DATADIR}/features/*vlad*.h5; do
+#scripts/tsne_embed2.py ${featurefile} --kernel linear --n-repeats 10
+#done
+#
+#
+## t-SNE figure generation
+#
+#echo "generating t-SNE map"
+#for featurefile in ${DATADIR}/tsne/*.h5; do
+#scripts/tsne_map2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --perplexity 40 --bordersize 8
+#done
+#

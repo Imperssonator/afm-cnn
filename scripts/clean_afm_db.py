@@ -34,9 +34,10 @@ def clean_afm_db(orig_csv, out_csv):
     df_mg['noise'] = df_mg['noise'].str.replace('hs','s')
     df_mg['noise'] = df_mg['noise'].str.replace('vg','g')
     
-    # Remove images with horizontal gradient or vertical line - not enough images in these classes
+    # Remove images with horizontal gradient, vertical line, or 'X' class - not enough images in these classes
     df_mg = df_mg.loc[df_mg['noise']!='hg']
     df_mg = df_mg.loc[df_mg['noise']!='vl']
+    df_mg = df_mg.loc[df_mg['noise']!='x']
 
     # Write out the file
     df_mg.to_csv(path_or_buf=out_csv, index=False)

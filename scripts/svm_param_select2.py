@@ -9,6 +9,9 @@ from sklearn.decomposition import PCA
 from sklearn.svm import SVC, LinearSVC
 from sklearn.metrics.pairwise import chi2_kernel, additive_chi2_kernel
 from sklearn.model_selection import StratifiedShuffleSplit, StratifiedKFold
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import confusion_matrix
 
 ## needed with slurm to see local python library under working dir
 #import sys
@@ -52,6 +55,55 @@ def select_balanced_dataset(labels, X, n_per_class=50, seed=0):
     np.random.seed() # reset seed to randomize cv folds across runs
     return l, X, selection
 
+def cv_loop_rf(labels, X, cv, C=10, n_repeats=1, reduce_dim=None):
+    tscore, vscore = [], []
+    clf = RandomForestClassifier(n_estimators=C,
+                                 class_weight='balanced')
+    
+    for repeat in range(n_repeats):
+        for train, test in cv.split(X, labels):
+            if reduce_dim:
+                pca = PCA(n_components=reduce_dim).fit(X[train])
+                Xtrain = pca.transform(X[train])
+                Xtest = pca.transform(X[test])
+            else:
+                Xtrain = X[train]
+                Xtest = X[test]
+            
+            print('train shape')
+            print(Xtrain.shape)
+            print('test shape')
+            print(Xtest.shape)
+            
+            # L2-normalize instances for linear SVM following Vedaldi and Zisserman
+            # Efficient Additive Kernels via Explicit Feature Maps
+            # Also: Perronnin, Sanchez, and Mensink
+            # Improving the Fisher kernel for large-scale image classification
+
+            scaling = MinMaxScaler(feature_range=(-1,1)).fit(Xtrain)
+            Xtrain = scaling.transform(Xtrain)
+            Xtest = scaling.transform(Xtest)
+            #            Xtrain = Xtrain / np.linalg.norm(Xtrain, axis=1)[:,np.newaxis]
+            #            Xtest = Xtest / np.linalg.norm(Xtest, axis=1)[:,np.newaxis]
+
+            clf.fit(Xtrain, labels[train])
+            tscore.append(clf.score(Xtrain, labels[train]))
+            print('train score')
+            print(tscore)
+            vscore.append(clf.score(Xtest, labels[test]))
+            print('validate score')
+            print(vscore)
+
+            # Confusion Matrix
+            predicted=clf.predict(Xtest)
+            confusion = confusion_matrix(labels[test],predicted)
+            print('confusion!')
+            print(confusion)
+
+    print('{} +/- {}'.format(np.mean(vscore), np.std(vscore, ddof=1)))
+    return np.mean(vscore), np.std(vscore, ddof=1), np.mean(tscore), np.std(tscore, ddof=1)
+
+
 def cv_loop_chi2(labels, X, cv, C=1, n_repeats=1):
     tscore, vscore = [], []
     for repeat in range(n_repeats):
@@ -71,7 +123,7 @@ def cv_loop_chi2(labels, X, cv, C=1, n_repeats=1):
 def cv_loop_linear(labels, X, cv, C=1, n_repeats=1, reduce_dim=None):
     tscore, vscore = [], []
     clf = SVC(kernel='linear', C=C,
-              class_weight='balanced', decision_function_shape='ovr', cache_size=2048)
+              class_weight='balanced', decision_function_shape='ovr', cache_size=7000)
     for repeat in range(n_repeats):
         for train, test in cv.split(X, labels):
 
@@ -90,9 +142,13 @@ def cv_loop_linear(labels, X, cv, C=1, n_repeats=1, reduce_dim=None):
             # Efficient Additive Kernels via Explicit Feature Maps
             # Also: Perronnin, Sanchez, and Mensink
             # Improving the Fisher kernel for large-scale image classification
-            Xtrain = Xtrain / np.linalg.norm(Xtrain, axis=1)[:,np.newaxis]
-            Xtest = Xtest / np.linalg.norm(Xtest, axis=1)[:,np.newaxis]
-    
+
+            scaling = MinMaxScaler(feature_range=(-1,1)).fit(Xtrain)
+            Xtrain = scaling.transform(Xtrain)
+            Xtest = scaling.transform(Xtest)
+#            Xtrain = Xtrain / np.linalg.norm(Xtrain, axis=1)[:,np.newaxis]
+#            Xtest = Xtest / np.linalg.norm(Xtest, axis=1)[:,np.newaxis]
+
             clf.fit(Xtrain, labels[train])
             tscore.append(clf.score(Xtrain, labels[train]))
             print('train score')
@@ -108,26 +164,14 @@ def cv_loop_linear(labels, X, cv, C=1, n_repeats=1, reduce_dim=None):
 @click.argument('datafile', type=click.Path())
 @click.argument('dbcsv', type=click.Path())
 @click.argument('task', type=click.Path())
-@click.option('--kernel', '-k', type=click.Choice(['linear', 'chi2', 'rbf']), default='linear')
+@click.option('--kernel', '-k', type=click.Choice(['linear', 'chi2', 'rbf', 'rf']), default='linear')
 @click.option('--margin-param', '-C', type=float, default=None)
-@click.option('--n-per-class', '-n', type=int, default=50)
+@click.option('--n-per-class', '-n', type=int, default=None)
 @click.option('--n-repeats', '-r', type=int, default=1)
 @click.option('--reduce-dim', '-d', type=int, default=None)
 @click.option('--seed', '-s', type=int, default=None)
 def svm_param_select(datafile, dbcsv, task, kernel, margin_param, n_per_class, n_repeats, reduce_dim, seed):
     # datafile = './data/full/features/vgg16_block5_conv3-vlad-32.h5'
-
-    # if margin_param is specified, record the results
-    if margin_param is not None:
-        resultsdir = 'svmresults'
-    else:
-        resultsdir = 'svm'
-    resultsfile = datafile.replace('features', resultsdir).replace('h5', 'json')
-    
-    try:
-        os.makedirs(os.path.dirname(resultsfile))
-    except FileExistsError:
-        pass
     
     # Load keys and image features
     keys, features = load_representations(datafile)
@@ -138,22 +182,40 @@ def svm_param_select(datafile, dbcsv, task, kernel, margin_param, n_per_class, n
     labels=np.array(df_mg[task].loc[[int(s) for s in keys]])
 
     # Get a balanced dataset
-    l, X, sel = select_balanced_dataset(labels, features, n_per_class=n_per_class, seed=seed)
-    
+    if n_per_class is not None:
+        l, X, sel = select_balanced_dataset(labels, features, n_per_class=n_per_class, seed=seed)
+    else:
+        l = labels
+        X = features
+        sel = [i for i in range(len(keys))]
+
     # split datasets for K-fold cross validation
     cv = StratifiedKFold(n_splits=10, shuffle=True)
     # cv = StratifiedShuffleSplit(n_splits=10, test_size=0.1)
 
+    # Save the results
     print(datafile)
+    
+    if margin_param is not None:
+        resultsdir = 'svmresults'
+    else:
+        resultsdir = 'svm'
+
     results = {
         'training_set': list(keys[sel]),
         'kernel': kernel,
-        'n_per_class': n_per_class,
-        'seed': seed,
-        'n_repeats': n_repeats,
-        'cv_C': {}
-    }
+            'n_per_class': n_per_class,
+            'seed': seed,
+            'n_repeats': n_repeats,
+            'cv_C': {}
+        }
+
+    resultsfile = datafile.replace('features', resultsdir).replace('.h5', '-{kernel}.json'.format(**results))
     
+    try:
+        os.makedirs(os.path.dirname(resultsfile))
+    except FileExistsError:
+        pass
 
     if margin_param is not None:
         C_range = [margin_param]
@@ -164,9 +226,12 @@ def svm_param_select(datafile, dbcsv, task, kernel, margin_param, n_per_class, n
         print(C)
         if kernel == 'linear':
             score, std, tscore, tstd = cv_loop_linear(l, X, cv, C=C,
-                                                      n_repeats=n_repeats, reduce_dim=reduce_dim)
+                                                      n_repeats=n_repeats,
+                                                      reduce_dim=reduce_dim)
         elif kernel == 'chi2':
             score, std, tscore, tstd = cv_loop_chi2(l, X, cv, C=C, n_repeats=n_repeats)
+        elif kernel == 'rf':
+            score, std, tscore, tstd = cv_loop_rf(l, X, cv, n_repeats=n_repeats)
             
         results['cv_C'][C] = {
             'score': score,

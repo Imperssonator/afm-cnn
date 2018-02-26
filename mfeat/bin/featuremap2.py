@@ -34,9 +34,9 @@ def ensure_dir(path):
     except: pass
 
 @click.command()
-@click.argument('micrographs_json', nargs=1, type=click.Path())
+@click.argument('afm_csv', nargs=1, type=click.Path())
 @click.option('-k', '--n_clusters', help='number of dictionary words', default=100)
-@click.option('-s', '--style', default='ssift', type=click.Choice(['ssift', 'dsift', 'vgg16']),
+@click.option('-s', '--style', default='ssift', type=click.Choice(['cvsift', 'ssift', 'dsift', 'vgg16']),
               help='select image representation')
 @click.option('-e', '--encoding', default='bow', type=click.Choice(['bow', 'vlad', 'fisher']),
               help='select image feature encoding method')
@@ -44,12 +44,12 @@ def ensure_dir(path):
               help='select vgg16 convolution layer')
 @click.option('--multiscale/--no-multiscale', default=False,
               help='multiscale spatial pooling for CNN feature maps')
-def featuremap2(micrographs_json, n_clusters, style, encoding, layername, multiscale):
-    """ compute image representations for each image enumerated in micrographs_json 
-        results are stored in HDF5 keyed by the image ids in micrographs_json
+def featuremap2(afm_csv, n_clusters, style, encoding, layername, multiscale):
+    """ compute image representations for each image enumerated in afm_csv
+        results are stored in HDF5 keyed by the image ids in afm_csv
     """
     
-    dataset_dir, __ = os.path.split(micrographs_json)
+    dataset_dir, __ = os.path.split(afm_csv)
 
     ensure_dir(os.path.join(dataset_dir, 'dictionary'))
     ensure_dir(os.path.join(dataset_dir, 'features'))
@@ -70,7 +70,7 @@ def featuremap2(micrographs_json, n_clusters, style, encoding, layername, multis
     }
     
     # obtain a dataset
-    df_mg = pd.read_csv(micrographs_json)
+    df_mg = pd.read_csv(afm_csv)
     df_mg.imPath = [dataset_dir+'/'+str(i)+'.tif' for i in df_mg['id'].tolist()]
 
     keys = [str(i) for i in df_mg['id'].tolist()]
@@ -85,6 +85,8 @@ def featuremap2(micrographs_json, n_clusters, style, encoding, layername, multis
         extract_func = lambda mic, fraction=1.0: local.sparse_sift(mic, fraction=fraction)
     elif style == 'dsift':
         extract_func = lambda mic, fraction=1.0: local.dense_sift(mic, fraction=fraction)
+    elif style == 'cvsift':
+        extract_func = lambda mic, fraction=1.0: local.cv_sift(mic, fraction=fraction)
     elif style == 'vgg16':
         if multiscale:
             # use default scale parameters for now: 1/sqrt(2) with one octave of upsampling, 3 downsampling
@@ -97,7 +99,7 @@ def featuremap2(micrographs_json, n_clusters, style, encoding, layername, multis
         print('loaded dictionary')
     except FileNotFoundError:
         print('learning dictionary for {} images'.format(len(micrographs)))
-        training_fraction = 0.1
+        training_fraction = 0.2
 
         results = map(partial(extract_func, fraction=training_fraction), micrographs)
         features = np.vstack(results)
