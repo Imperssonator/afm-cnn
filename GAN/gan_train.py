@@ -206,6 +206,20 @@ def show_generator_output(sess, n_images, input_z, out_channel_dim):
     f = n_imshow(samples[:num_to_show])
     return f
 
+
+def example_generator_output(sess, n_images, input_z, out_channel_dim):
+    """
+    Show example output for the generator
+    """
+    z_dim = input_z.get_shape().as_list()[-1]
+    example_z = np.random.uniform(-1, 1, size=[n_images, z_dim])
+
+    samples = sess.run(
+        generator(input_z, out_channel_dim, is_train=False),
+        feed_dict={input_z: example_z})
+    
+    return samples
+
     
 @click.command()
 @click.argument('datadir', type=click.Path())
@@ -277,10 +291,12 @@ def train(datadir, epoch_count=2, batch_size=100, z_dim=100, learning_rate=0.000
                           "Discriminator Loss: {:.4f}...".format(train_loss_d),
                           "Generator Loss: {:.4f}".format(train_loss_g))
                     
-                    f = show_generator_output(sess, 1, input_z, data_shape[3])
-                    plt.savefig(os.path.join(fig_save_dir,
-                                             'generator_out_e{}_s{}.png'.format(epoch_i,steps)))
-                    plt.close(f)
+                    # Save example generator images
+                    num_gen_examples = 8
+                    samples = example_generator_output(sess, num_gen_examples, input_z, data_shape[3])
+                    for i in range(num_gen_examples):
+                        io.imsave('gen_out_e{}_s{}_{}.png'.format(epoch_i,steps,i),
+                                  samples[i,:,:,:])
                     
                 end = time.time()
                 print('step time was {}'.format(end-start))
