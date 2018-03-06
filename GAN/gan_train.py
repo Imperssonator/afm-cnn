@@ -73,7 +73,7 @@ def model_inputs(image_width, image_height, image_channels, z_dim):
     return inputs_real, inputs_z, learning_rate
 
 
-def discriminator(images, net={}, reuse=False):
+def discriminator(images, reuse=False, net={}):
     """
     Create the discriminator network
     """
@@ -108,7 +108,7 @@ def discriminator(images, net={}, reuse=False):
         return net['out'], net['logits'], net
     
     
-def generator(z, out_channel_dim, net={}, is_train=True):
+def generator(z, out_channel_dim, is_train=True, net={}):
     """
     Create the generator network
     """
@@ -198,7 +198,7 @@ def show_generator_output(sess, n_images, input_z, out_channel_dim):
     example_z = np.random.uniform(-1, 1, size=[n_images, z_dim])
 
     samples = sess.run(
-        generator(input_z, out_channel_dim, False),
+        generator(input_z, out_channel_dim, is_train=False),
         feed_dict={input_z: example_z})
     
     num_to_show = np.max(n_images,6)
