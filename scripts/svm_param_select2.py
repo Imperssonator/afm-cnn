@@ -56,6 +56,9 @@ def select_balanced_dataset(labels, X, n_per_class=50, seed=0):
     return l, X, selection
 
 def cv_loop_rf(labels, X, cv, C=10, n_repeats=1, reduce_dim=None):
+    
+    # For random forest, C = number of trees
+    
     tscore, vscore = [], []
     clf = RandomForestClassifier(n_estimators=C,
                                  class_weight='balanced')
@@ -210,7 +213,7 @@ def svm_param_select(datafile, dbcsv, task, kernel, margin_param, n_per_class, n
             'cv_C': {}
         }
 
-    resultsfile = datafile.replace('features', resultsdir).replace('.h5', '-{kernel}.json'.format(**results))
+    resultsfile = datafile.replace('features', resultsdir).replace('.h5', '-{kernel}-{n_per_class}.json'.format(**results))
     
     try:
         os.makedirs(os.path.dirname(resultsfile))

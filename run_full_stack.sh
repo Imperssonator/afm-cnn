@@ -21,7 +21,7 @@ TASK=noise
 # Second argument is output clean csv file (make sure it's the same folder as the original, can be named anything...
 
 echo "cleaning database"
-scripts/clean_afm_db.py ${DATADIR}/afm.csv ${DATADIR}/${CLEANCSV}
+#scripts/clean_afm_db.py ${DATADIR}/afm.csv ${DATADIR}/${CLEANCSV}
 
 
 # Compute CNN representations
@@ -48,7 +48,7 @@ echo "computing representations"
 #    mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s vgg16 -e vlad -k ${v_size} -l block5_conv3
 #done
 
-#mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s cvsift -e vlad -k 256
+#mfeat/bin/featuremap2.py ${DATADIR}/${CLEANCSV} -s cvsift -e vlad -k 512
 
 
 # Train SVM for desired classification task
@@ -62,7 +62,7 @@ echo "computing representations"
 
 echo "training RandomForest"
 for featurefile in ${DATADIR}/features/*vlad*.h5; do
-scripts/svm_param_select2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --kernel rf -C 20 -r 1;
+scripts/svm_param_select2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --kernel rf -C 20 -r 1 -n 50;
 done
 
 
