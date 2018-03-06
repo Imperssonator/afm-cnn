@@ -294,6 +294,9 @@ def train(datadir, epoch_count=2, batch_size=100, z_dim=100, learning_rate=0.000
                     # Save example generator images
                     num_gen_examples = 8
                     samples = example_generator_output(sess, num_gen_examples, input_z, data_shape[3])
+                    print(samples)
+                    print(samples.dtype)
+                    print(samples[0])
                     for i in range(num_gen_examples):
                         io.imsave('gen_out_e{}_s{}_{}.png'.format(epoch_i,steps,i),
                                   samples[i,:,:,:])
