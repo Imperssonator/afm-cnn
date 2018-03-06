@@ -258,7 +258,7 @@ def train(datadir, epoch_count=2, batch_size=100, z_dim=100, learning_rate=0.000
                 
                 start = time.time()
                 
-                print('step {} of {}'.format(steps,data_shape[0]/batch_size))
+                print('step {} of {}'.format(steps,int(data_shape[0]/batch_size)))
                 
                 # values range from -0.5 to 0.5, therefore scale to range -1, 1
                 steps += 1
@@ -273,7 +273,7 @@ def train(datadir, epoch_count=2, batch_size=100, z_dim=100, learning_rate=0.000
                     train_loss_d = d_loss.eval({input_z: batch_z, input_real: batch_images})
                     train_loss_g = g_loss.eval({input_z: batch_z})
 
-                    print("Epoch {}/{}...".format(epoch_i+1, epochs),
+                    print("Epoch {}/{}...".format(epoch_i+1, epoch_count),
                           "Discriminator Loss: {:.4f}...".format(train_loss_d),
                           "Generator Loss: {:.4f}".format(train_loss_g))
                     
