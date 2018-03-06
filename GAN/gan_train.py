@@ -201,7 +201,7 @@ def show_generator_output(sess, n_images, input_z, out_channel_dim):
         generator(input_z, out_channel_dim, is_train=False),
         feed_dict={input_z: example_z})
     
-    num_to_show = np.max(n_images,6)
+    num_to_show = max(n_images,6)
     
     f = n_imshow(samples[:num_to_show])
     return f
