@@ -277,7 +277,7 @@ def train(datadir, epoch_count=2, batch_size=100, z_dim=100, learning_rate=0.000
                           "Discriminator Loss: {:.4f}...".format(train_loss_d),
                           "Generator Loss: {:.4f}".format(train_loss_g))
                     
-                    f = show_generator_output(sess, 1, input_z, data_shape[3], epoch_i, steps, datadir)
+                    f = show_generator_output(sess, 1, input_z, data_shape[3])
                     plt.savefig(os.path.join(fig_save_dir,
                                              'generator_out_e{}_s{}.png'.format(epoch_i,steps)))
                     plt.close(f)
