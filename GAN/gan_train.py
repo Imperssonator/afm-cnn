@@ -268,7 +268,7 @@ def train(datadir, epoch_count=2, batch_size=100, z_dim=100, learning_rate=0.000
                 _ = sess.run(d_opt, feed_dict={input_real: batch_images, input_z: batch_z})
                 _ = sess.run(g_opt, feed_dict={input_real: batch_images, input_z: batch_z})
                 
-                if steps % 400 == 0:
+                if steps % 100 == 0:
                     # At the end of every 10 epochs, get the losses and print them out
                     train_loss_d = d_loss.eval({input_z: batch_z, input_real: batch_images})
                     train_loss_g = g_loss.eval({input_z: batch_z})
