@@ -133,13 +133,8 @@ def generator(z, out_channel_dim, is_train=True, net={}):
         net['batch_norm4'] = tf.layers.batch_normalization(net['deconv4'], training=is_train)
         net['lrelu4'] = tf.maximum(alpha * net['batch_norm4'], net['batch_norm4'])
         
-        # Deconv 3
-        net['deconv5'] = tf.layers.conv2d_transpose(net['lrelu4'], 64, 5, 2, padding='SAME')
-        net['batch_norm5'] = tf.layers.batch_normalization(net['deconv5'], training=is_train)
-        net['lrelu5'] = tf.maximum(alpha * net['batch_norm5'], net['batch_norm5'])
-        
-        # Output layer
-        net['logits'] = tf.layers.conv2d_transpose(net['lrelu5'], out_channel_dim, 5, 2, padding='SAME')
+        # Output layer (Deconv 3)
+        net['logits'] = tf.layers.conv2d_transpose(net['lrelu4'], out_channel_dim, 5, 2, padding='SAME')
         
         net['out'] = tf.tanh(net['logits'])
         
@@ -224,11 +219,11 @@ def example_generator_output(sess, n_images, input_z, out_channel_dim):
 @click.command()
 @click.argument('datadir', type=click.Path())
 @click.option('--epoch-count', '-e', type=int, default=2)
-@click.option('--batch-size', '-s', type=int, default=100)
+@click.option('--batch-size', '-s', type=int, default=10)
 @click.option('--z-dim', '-z', type=int, default=100)
 @click.option('--learning-rate', '-r', type=float, default=0.0002)
 @click.option('--beta1', '-b', type=float, default=0.5)
-def train(datadir, epoch_count=2, batch_size=100, z_dim=100, learning_rate=0.0002, beta1=0.5):
+def train(datadir, epoch_count=2, batch_size=10, z_dim=100, learning_rate=0.0002, beta1=0.5):
     """
     Train the GAN
     """
@@ -296,9 +291,10 @@ def train(datadir, epoch_count=2, batch_size=100, z_dim=100, learning_rate=0.000
                     samples = example_generator_output(sess, num_gen_examples, input_z, data_shape[3])
                     print(samples.shape)
                     for i in range(num_gen_examples):
-                        io.imsave('gen_out_e{}_s{}_{}.png'.format(epoch_i,steps,i),
+                        io.imsave(os.path.join(fig_save_dir,
+                                               'gen_out_e{}_s{}_{}.png'.format(epoch_i,steps,i)),
                                   samples[i,:,:,0])
-                    
+            
                 end = time.time()
                 print('step time was {}'.format(end-start))
                     
