@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 from glob import glob
+import random
 from matplotlib import pyplot as plt
 from skimage import io
 import numpy as np
@@ -83,24 +84,30 @@ def discriminator(images, reuse=False, net={}):
         # using 4 layer network as in DCGAN Paper
         
         # Conv 1
-        net['conv1'] = tf.layers.conv2d(images, 64, 5, 2, 'SAME')
+        net['conv1'] = tf.layers.conv2d(images, 32, 5, 2, 'SAME')
         net['lrelu1'] = tf.maximum(alpha * net['conv1'], net['conv1'])
         
         # Conv 2
-        net['conv2'] = tf.layers.conv2d(net['lrelu1'], 128, 5, 2, 'SAME')
+        net['conv2'] = tf.layers.conv2d(net['lrelu1'], 64, 5, 2, 'SAME')
         net['batch_norm2'] = tf.layers.batch_normalization(net['conv2'], training=True)
         net['lrelu2'] = tf.maximum(alpha * net['batch_norm2'], net['batch_norm2'])
         
         # Conv 3
-        net['conv3'] = tf.layers.conv2d(net['lrelu2'], 256, 5, 2, 'SAME')
+        net['conv3'] = tf.layers.conv2d(net['lrelu2'], 128, 5, 2, 'SAME')
         net['batch_norm3'] = tf.layers.batch_normalization(net['conv3'], training=True)
         net['lrelu3'] = tf.maximum(alpha * net['batch_norm3'], net['batch_norm3'])
+        
+        # Conv 4
+        net['conv4'] = tf.layers.conv2d(net['lrelu3'], 256, 5, 2, 'SAME')
+        net['batch_norm4'] = tf.layers.batch_normalization(net['conv4'], training=True)
+        net['lrelu4'] = tf.maximum(alpha * net['batch_norm4'], net['batch_norm4'])
        
         # Flatten
-        net['flat'] = tf.reshape(net['lrelu3'], (-1, 64*64*256))
+        net['flat'] = tf.reshape(net['lrelu4'], (-1, 16*16*256))
+        net['dropout'] = tf.layers.dropout(net['flat'], rate=0.4)
         
         # Logits
-        net['logits'] = tf.layers.dense(net['flat'], 1)
+        net['logits'] = tf.layers.dense(net['dropout'], 1)
         
         # Output
         net['out'] = tf.sigmoid(net['logits'])
@@ -116,10 +123,10 @@ def generator(z, out_channel_dim, is_train=True, net={}):
     
     with tf.variable_scope('generator', reuse=False if is_train==True else True):
         # First fully connected layer
-        net['x_1'] = tf.layers.dense(z, 64*64*256)
+        net['x_1'] = tf.layers.dense(z, 16*16*256)
         
         # Reshape it to start the convolutional stack
-        net['deconv_2'] = tf.reshape(net['x_1'], (-1, 64, 64, 256))
+        net['deconv_2'] = tf.reshape(net['x_1'], (-1, 16, 16, 256))
         net['batch_norm2'] = tf.layers.batch_normalization(net['deconv_2'], training=is_train)
         net['lrelu2'] = tf.maximum(alpha * net['batch_norm2'], net['batch_norm2'])
         
@@ -133,8 +140,13 @@ def generator(z, out_channel_dim, is_train=True, net={}):
         net['batch_norm4'] = tf.layers.batch_normalization(net['deconv4'], training=is_train)
         net['lrelu4'] = tf.maximum(alpha * net['batch_norm4'], net['batch_norm4'])
         
+        # Deconv 3
+        net['deconv5'] = tf.layers.conv2d_transpose(net['lrelu4'], 64, 5, 2, padding='SAME')
+        net['batch_norm5'] = tf.layers.batch_normalization(net['deconv5'], training=is_train)
+        net['lrelu5'] = tf.maximum(alpha * net['batch_norm5'], net['batch_norm5'])
+        
         # Output layer (Deconv 3)
-        net['logits'] = tf.layers.conv2d_transpose(net['lrelu4'], out_channel_dim, 5, 2, padding='SAME')
+        net['logits'] = tf.layers.conv2d_transpose(net['lrelu5'], out_channel_dim, 5, 2, padding='SAME')
         
         net['out'] = tf.tanh(net['logits'])
         
@@ -238,6 +250,7 @@ def train(datadir, epoch_count=2, batch_size=10, z_dim=100, learning_rate=0.0002
     
     # Build data file list and determine shape
     data_files = glob(os.path.join(datadir, '*.tif'))
+    random.shuffle(data_files)  # This way the batches won't bias the training steps toward any user
     test_img = get_image(data_files[0])
     IMAGE_WIDTH = test_img.shape[0]
     IMAGE_HEIGHT = test_img.shape[1]
@@ -277,8 +290,8 @@ def train(datadir, epoch_count=2, batch_size=10, z_dim=100, learning_rate=0.0002
                 _ = sess.run(d_opt, feed_dict={input_real: batch_images, input_z: batch_z})
                 _ = sess.run(g_opt, feed_dict={input_real: batch_images, input_z: batch_z})
                 
-                if steps % 50 == 0:
-                    # At the end of every 10 epochs, get the losses and print them out
+                if steps % 100 == 0:
+                    # At the end of every N steps, get the losses and print them out
                     train_loss_d = d_loss.eval({input_z: batch_z, input_real: batch_images})
                     train_loss_g = g_loss.eval({input_z: batch_z})
 
@@ -286,7 +299,7 @@ def train(datadir, epoch_count=2, batch_size=10, z_dim=100, learning_rate=0.0002
                           "Discriminator Loss: {:.4f}...".format(train_loss_d),
                           "Generator Loss: {:.4f}".format(train_loss_g))
                     
-                    # Save example generator images
+                    # And save example generator images
                     num_gen_examples = 8
                     samples = example_generator_output(sess, num_gen_examples, input_z, data_shape[3])
                     print(samples.shape)
