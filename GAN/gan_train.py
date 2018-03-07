@@ -249,7 +249,7 @@ def train(datadir, epoch_count=2, batch_size=10, z_dim=100, learning_rate=0.0002
     
     
     # Build data file list and determine shape
-    data_files = glob(os.path.join(datadir, '*.tif'))
+    data_files = glob(os.path.join(datadir, '*.png'))
     random.shuffle(data_files)  # This way the batches won't bias the training steps toward any user
     test_img = get_image(data_files[0])
     IMAGE_WIDTH = test_img.shape[0]
