@@ -275,12 +275,13 @@ def train(datadir, epoch_count=2, batch_size=10, z_dim=100, learning_rate=0.0002
         for epoch_i in range(epoch_count):
             
             steps = 0
+            steps_per_epoch = int(data_shape[0]/batch_size)
             
             for batch_images in get_batches(data_files,batch_size):
                 
                 start = time.time()
                 
-                print('step {} of {}'.format(steps,int(data_shape[0]/batch_size)))
+                print('step {} of {}'.format(steps,steps_per_epoch))
                 
                 # values range from -0.5 to 0.5, therefore scale to range -1, 1
                 steps += 1
@@ -290,8 +291,8 @@ def train(datadir, epoch_count=2, batch_size=10, z_dim=100, learning_rate=0.0002
                 _ = sess.run(d_opt, feed_dict={input_real: batch_images, input_z: batch_z})
                 _ = sess.run(g_opt, feed_dict={input_real: batch_images, input_z: batch_z})
                 
-                if steps % 100 == 0:
-                    # At the end of every N steps, get the losses and print them out
+                if steps in [int(steps_per_epoch/2), steps_per_epoch]:
+                    # At halfway and final step in epoch, print loss and save generator images
                     train_loss_d = d_loss.eval({input_z: batch_z, input_real: batch_images})
                     train_loss_g = g_loss.eval({input_z: batch_z})
 
