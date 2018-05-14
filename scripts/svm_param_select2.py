@@ -187,24 +187,38 @@ def cv_loop_linear(labels, X, cv, C=1, n_repeats=1, reduce_dim=None):
 def svm_param_select(datafile, dbcsv, task, kernel, margin_param, n_per_class, n_repeats, reduce_dim, seed):
     # datafile = './data/full/features/vgg16_block5_conv3-vlad-32.h5'
     
-    # Load keys and image features
+    # Load keys and image features, convert to dataframe, set keys as the index
     keys, features = load_representations(datafile)
+    df_feat = pd.DataFrame({'keys':pd.Series(keys.astype(int)),
+                            'features':pd.Series([row for row in features])}
+                           )
+    df_feat_ind.set_index('keys',inplace=True)
 
-    # Generate "labels" from df_mg pandas dataframe. Task must be a valid column in the csv database
-    df_mg = pd.read_csv(dbcsv)
-    df_mg.set_index('id',inplace=True)
-    labels=np.array(df_mg[task].loc[[int(s) for s in keys]])
+    # Load labels from csv. 'id' column corresponds to keys, so we will set that as an index as well
+    df_lab = pd.read_csv(dbcsv)
+    df_lab_ind.set_index('id')
+    
+    # Find the intersection of keys and ids so we know we have features for all of our labels and vice versa
+    inter = np.intersect1d(df_lab_ind.index.values,
+                           df_feat_ind.index.values)
+    
+    df_feat_red = df_feat_ind.loc[inter]
+    df_lab_red = df_lab_ind.loc[inter]
+    
+    labels_red = df_lab_red['noise'].values
+    feats_red = np.vstack(df_feat_red['features'].values)
+    
     print(keys.shape)
-    print(features.shape)
-    print(len(df_mg))
-    print(labels.shape)
+    print(feats_red.shape)
+    print(len(df_lab))
+    print(labels_red.shape)
 
     # Get a balanced dataset
     if n_per_class is not None:
-        l, X, sel = select_balanced_dataset(labels, features, n_per_class=n_per_class, seed=seed)
+        l, X, sel = select_balanced_dataset(labels_red, feats_red, n_per_class=n_per_class, seed=seed)
     else:
-        l = labels
-        X = features
+        l = labels_red
+        X = feats_red
         sel = [i for i in range(len(keys))]
 
     # split datasets for K-fold cross validation
