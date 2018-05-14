@@ -11,7 +11,7 @@
 # the name for the cleaned CSV database
 # The classification task (column of CSV)
 
-DATADIR=data/raw
+DATADIR=/data/nep1/afm
 CLEANCSV=afm_clean.csv
 TASK=noise
 
@@ -53,17 +53,17 @@ echo "computing representations"
 
 # Train SVM for desired classification task
 
-#echo "training SVM"
-#for featurefile in ${DATADIR}/features/*vlad*.h5; do
-#scripts/svm_param_select2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --kernel linear -C 1 -n 50 -r 10;
-#done
+echo "training SVM"
+for featurefile in ${DATADIR}/features/*vlad*.h5; do
+scripts/svm_param_select2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --kernel linear -C 1 -n 50 -r 10;
+done
 
 # For training RandomForests, use kernel "rf", and C = n_estimators
 
-echo "training RandomForest"
-for featurefile in ${DATADIR}/features/*vlad*.h5; do
-scripts/svm_param_select2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --kernel rf -C 20 -r 1 -n 50;
-done
+#echo "training RandomForest"
+#for featurefile in ${DATADIR}/features/*vlad*.h5; do
+#scripts/svm_param_select2.py ${featurefile} ${DATADIR}/${CLEANCSV} ${TASK} --kernel rf -C 20 -r 1 -n 50;
+#done
 
 
 ## t-SNE embedding

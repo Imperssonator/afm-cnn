@@ -127,6 +127,8 @@ def cv_loop_linear(labels, X, cv, C=1, n_repeats=1, reduce_dim=None):
     tscore, vscore = [], []
     clf = SVC(kernel='linear', C=C,
               class_weight='balanced', decision_function_shape='ovr', cache_size=7000)
+              
+    conf_list = []
     for repeat in range(n_repeats):
         for train, test in cv.split(X, labels):
 
@@ -160,13 +162,22 @@ def cv_loop_linear(labels, X, cv, C=1, n_repeats=1, reduce_dim=None):
             print('validate score')
             print(vscore)
 
+            # Confusion Matrix
+            predicted=clf.predict(Xtest)
+            confusion = confusion_matrix(labels[test],predicted)
+            print('confusion!')
+            print(confusion)
+            conf_list.append(confusion)
+
+
+
     print('{} +/- {}'.format(np.mean(vscore), np.std(vscore, ddof=1)))
-    return np.mean(vscore), np.std(vscore, ddof=1), np.mean(tscore), np.std(tscore, ddof=1)
+    return np.mean(vscore), np.std(vscore, ddof=1), np.mean(tscore), np.std(tscore, ddof=1), np.array(conf_list)
 
 @click.command()
 @click.argument('datafile', type=click.Path())
 @click.argument('dbcsv', type=click.Path())
-@click.argument('task', type=click.Path())
+@click.argument('task', type=str, default='noise')
 @click.option('--kernel', '-k', type=click.Choice(['linear', 'chi2', 'rbf', 'rf']), default='linear')
 @click.option('--margin-param', '-C', type=float, default=None)
 @click.option('--n-per-class', '-n', type=int, default=None)
@@ -207,13 +218,15 @@ def svm_param_select(datafile, dbcsv, task, kernel, margin_param, n_per_class, n
     results = {
         'training_set': list(keys[sel]),
         'kernel': kernel,
-            'n_per_class': n_per_class,
-            'seed': seed,
-            'n_repeats': n_repeats,
-            'cv_C': {}
+        'n_per_class': n_per_class,
+        'seed': seed,
+        'n_repeats': n_repeats,
+        'cv_C': {}
+        'task': task
         }
 
-    resultsfile = datafile.replace('features', resultsdir).replace('.h5', '-{kernel}-{n_per_class}.json'.format(**results))
+    resultsfile = datafile.replace('features', resultsdir).replace('.h5', '-{task}-{kernel}-{n_per_class}.json'.format(**results))
+    confmatfile = resultsfile.replace('.json','-confusion')
     
     try:
         os.makedirs(os.path.dirname(resultsfile))
@@ -228,13 +241,13 @@ def svm_param_select(datafile, dbcsv, task, kernel, margin_param, n_per_class, n
     for C in C_range:
         print(C)
         if kernel == 'linear':
-            score, std, tscore, tstd = cv_loop_linear(l, X, cv, C=C,
+            score, std, tscore, tstd, confusion = cv_loop_linear(l, X, cv, C=C,
                                                       n_repeats=n_repeats,
                                                       reduce_dim=reduce_dim)
         elif kernel == 'chi2':
-            score, std, tscore, tstd = cv_loop_chi2(l, X, cv, C=C, n_repeats=n_repeats)
+            score, std, tscore, tstd, confusion = cv_loop_chi2(l, X, cv, C=C, n_repeats=n_repeats)
         elif kernel == 'rf':
-            score, std, tscore, tstd = cv_loop_rf(l, X, cv, n_repeats=n_repeats)
+            score, std, tscore, tstd, confusion = cv_loop_rf(l, X, cv, n_repeats=n_repeats)
             
         results['cv_C'][C] = {
             'score': score,
@@ -242,7 +255,8 @@ def svm_param_select(datafile, dbcsv, task, kernel, margin_param, n_per_class, n
             'tscore': tscore,
             'tstd': tstd
         }
-        
+
+    np.save(confmatfile,confusion)
     with open(resultsfile, 'w') as jf:
         json.dump(results, jf)
 
