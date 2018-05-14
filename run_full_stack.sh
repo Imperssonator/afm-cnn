@@ -21,7 +21,7 @@ TASK=noise
 # Second argument is output clean csv file (make sure it's the same folder as the original, can be named anything...
 
 echo "cleaning database"
-#scripts/clean_afm_db.py ${DATADIR}/afm.csv ${DATADIR}/${CLEANCSV}
+scripts/clean_afm_db.py ${DATADIR}/afm.csv ${DATADIR}/${CLEANCSV}
 
 
 # Compute CNN representations
