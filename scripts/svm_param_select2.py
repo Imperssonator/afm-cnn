@@ -192,11 +192,11 @@ def svm_param_select(datafile, dbcsv, task, kernel, margin_param, n_per_class, n
     df_feat = pd.DataFrame({'keys':pd.Series(keys.astype(int)),
                             'features':pd.Series([row for row in features])}
                            )
-    df_feat_ind.set_index('keys',inplace=True)
+    df_feat_ind = df_feat.set_index('keys')
 
     # Load labels from csv. 'id' column corresponds to keys, so we will set that as an index as well
     df_lab = pd.read_csv(dbcsv)
-    df_lab_ind.set_index('id')
+    df_lab_ind = df_lab.set_index('id')
     
     # Find the intersection of keys and ids so we know we have features for all of our labels and vice versa
     inter = np.intersect1d(df_lab_ind.index.values,
