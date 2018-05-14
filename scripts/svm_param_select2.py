@@ -221,7 +221,7 @@ def svm_param_select(datafile, dbcsv, task, kernel, margin_param, n_per_class, n
         'n_per_class': n_per_class,
         'seed': seed,
         'n_repeats': n_repeats,
-        'cv_C': {}
+        'cv_C': {},
         'task': task
         }
 
