@@ -194,7 +194,10 @@ def svm_param_select(datafile, dbcsv, task, kernel, margin_param, n_per_class, n
     df_mg = pd.read_csv(dbcsv)
     df_mg.set_index('id',inplace=True)
     labels=np.array(df_mg[task].loc[[int(s) for s in keys]])
-    print(labels)
+    print(keys.shape)
+    print(features.shape)
+    print(len(df_mg))
+    print(labels.shape)
 
     # Get a balanced dataset
     if n_per_class is not None:
