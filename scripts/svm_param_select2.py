@@ -192,7 +192,8 @@ def svm_param_select(datafile, dbcsv, task, kernel, margin_param, n_per_class, n
     df_feat = pd.DataFrame({'keys':pd.Series(keys.astype(int)),
                             'features':pd.Series([row for row in features])}
                            )
-    df_feat_ind = df_feat.set_index('keys')
+    df_feat['id'] = df_feat['keys'].astype(int)
+    df_feat_ind = df_feat.set_index('id')
 
     # Load labels from csv. 'id' column corresponds to keys, so we will set that as an index as well
     df_lab = pd.read_csv(dbcsv)

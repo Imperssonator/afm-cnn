@@ -71,10 +71,13 @@ def featuremap2(afm_csv, n_clusters, style, encoding, layername, multiscale):
     
     # obtain a dataset
     df_mg = pd.read_csv(afm_csv)
-    df_mg.imPath = [dataset_dir+'/'+str(i)+'.tif' for i in df_mg['id'].tolist()]
+    df_mg['locPath'] = df_mg['imPath'].apply(
+                                lambda f: os.path.join(dataset_dir,
+                                                       os.path.basename(f))
+                                             )
 
-    keys = [str(i) for i in df_mg['id'].tolist()]
-    micrographs = [io.load_image(file, barheight=0) for file in df_mg['imPath'].tolist()]
+    keys = [str(i).zfill(6) for i in df_mg['id'].tolist()]
+    micrographs = [io.load_image(file, barheight=0) for file in df_mg['locPath'].tolist()]
 
     # set up paths
     dictionary_file = '{dir}/dictionary/{method}-kmeans-{n_clusters}.pkl'.format(**metadata)
