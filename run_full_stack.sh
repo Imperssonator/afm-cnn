@@ -11,8 +11,10 @@
 # the name for the cleaned CSV database
 # The classification task (column of CSV)
 
-DATADIR=/data/nep1/afm
-CLEANCSV=afm_clean.csv
+DATADIR=/Users/nils/CC/afm-cnn/data/raw
+#DATADIR=/data/nep1/afm
+ORIGCSV=afm_multi.csv
+CLEANCSV=afm_multi_clean.csv
 TASK=noise
 
 
@@ -21,7 +23,7 @@ TASK=noise
 # Second argument is output clean csv file (make sure it's the same folder as the original, can be named anything...
 
 echo "cleaning database"
-scripts/clean_afm_db.py ${DATADIR}/afm.csv ${DATADIR}/${CLEANCSV}
+scripts/clean_afm_db.py ${DATADIR}/${ORIGCSV} ${DATADIR}/${CLEANCSV}
 
 
 # Compute CNN representations
